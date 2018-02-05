@@ -170,11 +170,13 @@ $ hadoop dfsadmin -report
 ```
 
 ### MapReduce Example
+
 ```
 $ cd /home/vagrant/hadoop/share/hadoop/mapreduce
 $ yarn jar *examples*.jar pi 50 100
 ```
 
+### HDFS 관리페이지
 `http://192.168.33.10:50070`
 
 ### 로컬 테스트 시 winutils.exe 오류 
@@ -329,6 +331,8 @@ $ scp -r hbase-1.2.6 hadoop03:/home/vagrant
 $ bin/start-hbase.sh
 $ bin/stop-hbase.sh
 $ bin/hbase shell
+hbase(main):002:0> count 'Table1'
+hbase(main):006:0> scan 'Table1', {LIMIT => 2}
 ```
 
 Note: 프로그램에서 연결에 문제가 있을 경우 /etc/hosts 설정을 검토하자!
@@ -393,6 +397,11 @@ CREATE TABLE IF NOT EXISTS us_population (
       population BIGINT
       CONSTRAINT my_pk PRIMARY KEY (state, city));
 ```
+
+### JDBC 설정
+
+* org.apache.phoenix.jdbc.PhoenixDriver
+* jdbc:phoenix:localhost
 
 # Storm
 

@@ -100,3 +100,6 @@ $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic TestTopic --f
 about:blank
 data:text/html, <html contenteditable>
 ```
+
+<console.aws.amazon.com
+neobns.jwlee@gmail.com

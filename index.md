@@ -10,7 +10,7 @@ Log Monitoring Architecture
 1. Kafka 및 ~~Redis 활용~~
 1. ~~Grafana 와 InfluxDB를 이용한 대시보드 구성~~
 
-
+---
 
 모니터링 아키텍처 및 요소기술 
 --------------------------
@@ -44,7 +44,7 @@ Log Monitoring Architecture
 ### Other Hadoop-related projects at Apache include:
 
 * Ambari
-  +  A web-based tool for provisioning, managing, and monitoring Apache Hadoop clusters which includes support for Hadoop HDFS, Hadoop MapReduce, Hive, HCatalog, HBase, ZooKeeper, Oozie, Pig and Sqoop. Ambari also provides a dashboard for viewing cluster health such as heatmaps and ability to view MapReduce, Pig and Hive applications visually alongwith features to diagnose their performance characteristics in a user-friendly manner.
+  +  A web-based tool for provisioning, **managing, and monitoring** Apache Hadoop clusters which includes support for Hadoop HDFS, Hadoop MapReduce, Hive, HCatalog, HBase, ZooKeeper, Oozie, Pig and Sqoop. Ambari also provides a dashboard for viewing cluster health such as heatmaps and ability to view MapReduce, Pig and Hive applications visually alongwith features to diagnose their performance characteristics in a user-friendly manner.
 * Avro
   + A data serialization system
   + cf. **Thrift**, Protocol Buffers
@@ -53,9 +53,9 @@ Log Monitoring Architecture
 * Pig
   + A high-level data-flow language and execution framework for parallel computation.
 * Spark
-  + A fast and general compute engine for Hadoop data. Spark provides a simple and expressive programming model that supports a wide range of applications, including ETL, machine learning, stream processing, and graph computation.
+  + **A fast and general compute engine for Hadoop data.** Spark provides a simple and expressive programming model that supports a wide range of applications, including ETL, machine learning, stream processing, and graph computation.
 
-
+---
 
 하둡 및 HBase를 이용한 대용량 테이블 설계
 --------------------------------------
@@ -101,8 +101,10 @@ Master-Slave architecture
 * 블럭의 기본크기는 64MB, HDFS 설정에 따라서 바꿀 수 있음 
 * 블럭을 보관할 노드의 선택
   + 첫번째 복제는 원본과 같은 랙에 있는 노드를 선택
-  + 두번째와 세번째는 다른 랙에 보관
+  + 두번째와 세번째는 다른 랙에 보관  
   ![](image/block.png)
+
+
 
 #### Operations
 
@@ -189,6 +191,7 @@ Map
 Reduce
 * Merge
 
+---
 
 ## 2.2 HBase
 
@@ -363,13 +366,40 @@ hbase(main):011:0> drop 'test'
 0 row(s) in 0.1370 seconds
 ```
 
-#### 9. Exit the HBase Shell.
+#### 9. HBase scan option
+> 사용법 : scan "$TABLE_NAME", {$OPTION => $VALUE} (옵션 여러개 가능)
+
+```
+# 1) LIMIT : 출력할 row 수 제한
+scan "$TABLE_NAME", {LIMIT => 10}
+ 
+# 2) STARTROW / STOPROW : 출력할 row 범위 제한
+scan "$TABLE_NAME", {STARTROW => "$START_KEY", STOPROW => "$STOP_KEY"}
+ 
+# 3) COLUMNS : 원하는 column 출력(column은 columnFamily:columnQualifire 형태, CF:CQ)
+scan "$TABLE_NAME", {COLUMNS => "$CF:$CQ"}
+ 
+# 4) TIMERANGE : 특정 타임스탬프 사이의 값 조회
+scan "$TABLE_NAME", {TIMERANGE => [ts1, ts2]}
+ 
+# 5) ROWPREFIXFILTER : 특정 row key를 조회
+scan "$TABLE_NAME", {ROWPREFIXFILTER => "$ROWKEY"}
+```
+
+#### 10. HBase Filters
+> 사용법 : scan "$TABLE_NAME", {FILTER => "$filtername('$value')"}
+
+```
+scan "$TABLE_NAME", {OPTION => VALUE, FILTER => "FILTERNAME('VALUE')"}
+```
+
+#### Exit the HBase Shell.
 
 ```
 hbase(main):006:0> quit 
 ```
 
-
+---
 
 ### HBase Java Client Example
 
@@ -522,7 +552,7 @@ table.delete(delete);
   + Row Key Ordering: phoenix.query.rowKeyOrderSaltedTable=true
   + CREATE TABLE table (a_key VARCHAR PRIMARY KEY, a_col VARCHAR) SALT_BUCKETS = 20;
 
-### Apache Phoenix Java Client Example
+#### Apache Phoenix Java Client Example
 
 `Phoenix Driver Maven Dependency`
 ```xml
@@ -576,7 +606,7 @@ public class PhoenixExample {
 }
 ```
 
-
+---
 
 ## 2.3 ZooKeeper
 
@@ -688,7 +718,7 @@ public class ZNodeTest {
 }
 ```
 
-
+---
 
 Storm 을 이용한 실시간 데이터 분석
 --------------------------------
@@ -842,7 +872,7 @@ $ mvn clean package -DskipTests=true
 $ storm jar storm-0.0.1-SNAPSHOT.jar hello.HelloTopology HelloTopology
 ```
 
-
+---
 
 Kafka 및 Redis 활용
 ------------------
@@ -1057,7 +1087,7 @@ public class HelloRedis {
 }
 ```
 
-
+---
 
 Grafana 와 InfluxDB를 이용한 대시보드 구성
 ----------------------------------------
@@ -1081,7 +1111,7 @@ Grafana 와 InfluxDB를 이용한 대시보드 구성
 
 > Telegraf is the Agent for Collecting & Reporting Metrics & Data 
 
-
+---
 
 Reference 
 ---------
