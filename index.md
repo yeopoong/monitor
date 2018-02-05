@@ -624,6 +624,15 @@ sync | waits for data to be propagated
 
 ### Example
 
+`Maven Dependency`
+```xml
+<dependency>
+	<groupId>org.apache.zookeeper</groupId>
+	<artifactId>zookeeper</artifactId>
+	<version>3.4.8</version>
+</dependency>
+```
+
 `ZNodeTest.java`
 ```java
 public class ZNodeTest {
