@@ -31,13 +31,13 @@ Log Monitoring Architecture
 ## Tech Stack
 
 1. Distributed Platform: Hadoop
-1. Data Store: HBase
+1. Data Store: **HBase**
 1. Distribute Codinator: Zookeeper
-1. Realtime Analysis: Storm or Spark
+1. Realtime Analysis: **Storm** or Spark
 1. Visualization: Grafana
 1. TSDB: InfluxDB
 1. Collect: Telegraf
-1. Message Queue: Kafka
+1. Message Queue: **Kafka**
 1. In Memory Data Grid: Redis
 
 
@@ -47,7 +47,7 @@ Log Monitoring Architecture
   +  A web-based tool for provisioning, managing, and monitoring Apache Hadoop clusters which includes support for Hadoop HDFS, Hadoop MapReduce, Hive, HCatalog, HBase, ZooKeeper, Oozie, Pig and Sqoop. Ambari also provides a dashboard for viewing cluster health such as heatmaps and ability to view MapReduce, Pig and Hive applications visually alongwith features to diagnose their performance characteristics in a user-friendly manner.
 * Avro
   + A data serialization system
-  + cf. Thrift, Protocol Buffers
+  + cf. **Thrift**, Protocol Buffers
 * Hive
   + A data warehouse infrastructure that provides data summarization and ad hoc querying.
 * Pig
@@ -99,13 +99,10 @@ Master-Slave architecture
 
 * 여러 데이터 노드에 작은 파일로 나뉜다음 분산되어 저장 
 * 블럭의 기본크기는 64MB, HDFS 설정에 따라서 바꿀 수 있음 
-
-블럭을 보관할 노드의 선택
-
-* 첫번째 복제는 원본과 같은 랙에 있는 노드를 선택
-* 두번째와 세번째는 다른 랙에 보관
-
-![](image/block.png)
+* 블럭을 보관할 노드의 선택
+  + 첫번째 복제는 원본과 같은 랙에 있는 노드를 선택
+  + 두번째와 세번째는 다른 랙에 보관
+  ![](image/block.png)
 
 #### Operations
 
@@ -501,6 +498,8 @@ delete.addColumn(family1.getBytes(), qualifier1);
 table.delete(delete);
 ```
 
+---
+
 ### Apache Phoenix
 > Phoenix is an open source SQL skin for HBase.  
 > You use the standard JDBC APIs instead of the regular HBase client APIs to create tables, insert data, and query your HBase data.
@@ -602,6 +601,15 @@ public class PhoenixExample {
 * Zookeeper is fast.
   + It is especially fast in "read-dominant" workloads.
 
+### Data model and the hierarchical namespace
+
+![](https://zookeeper.apache.org/doc/current/images/zknamespace.jpg)
+
+### Nodes and ephemeral nodes
+
+* each node in a ZooKeeper namespace can have data associated with it as well as children.
+* These znodes exists as long as the session that created the znode is active.
+
 ### Simple API
 
 operation | desc
@@ -614,9 +622,62 @@ set data | writes data to a node
 get children | retrieves a list of children of a node
 sync | waits for data to be propagated
 
+### Example
 
-### Programming to ZooKeeper
+`ZNodeTest.java`
+```java
+public class ZNodeTest {
 
+    public static void main(String[] args) {
+        int sessionTimeout = 10 * 100;
+
+        // 1. ZooKeeper 서버(클러스터)에 연결
+        ZooKeeper zk = null;
+
+        try {
+            zk = new ZooKeeper("demo:2181", sessionTimeout, null);
+
+            // 2. Test01 znode가 존재하지 않으면 /test01, /test02 생성
+            if (zk.exists("/test01", false) == null) {
+                zk.create("/test01", "test01_data".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                zk.create("/test02", "test02_data".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            }
+
+            // 3 /test01 노드의 자식 노드로 sub01, sub02 생성
+            zk.create("/test01/sub01", null, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+            zk.create("/test01/sub02", null, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+
+            // 4. /test01 노드의 데이터 가져오기
+            byte[] test01Data = zk.getData("/test01", false, null);
+            System.out.println("getData [/test01]: " + new String(test01Data));
+
+            // 5. /test01/sub01 노드의 데이터를 새로운 값으로 설정
+            zk.setData("/test01/sub01", "this new Data".getBytes(), -1);
+            byte[] subData = zk.getData("/test01/sub01", false, null);
+            System.out.println("getData after setData [/test01/sub01]: " + new String(subData));
+
+            // 6. 노드가 존재하는지 확인
+            System.out.println("exist [/test01/sub01]: " + (zk.exists("/test01/sub01", false) != null));
+            System.out.println("exist [/test01/sub03]: " + (zk.exists("/test01/sub03", false) != null));
+
+            // 7. /test01의 자식노드 목록 가져오기
+            List<String> children = zk.getChildren("/test01", false);
+            for (String eachChildren : children) {
+                System.out.println("getChildren [/test01]: " + eachChildren);
+            }
+        } catch (IOException | KeeperException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            // 8. zk 죵료
+            try {
+                zk.close();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
 
 
 
