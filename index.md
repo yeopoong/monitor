@@ -254,23 +254,35 @@ Reduce
 
 ### HBase Catalog Tables
 
+![](image/hbase_meta1.png)
+
+* 클라이언트는 주키퍼의 META 테이블을 서비스하는 리전 서버의 호스트 정보를 읽어온다.
+
 ![](image/hbase_meta.png)
 
 * META 테이블
-  + 클러스터에 포함된 리전의 위치정보들을 저장
+  + 클러스터에 포함된 모든 리전정보 저장
+  + -ROOT-, .META.
 
-### Region Server Components 
+#### 데이터를 찾는 방법
+
+* ZooKeeper -> -Root- -> Region Server -> .META. -> Region -> Row
+
+### HBase Region Server
 
 ![](image/hbase_region_components.png)
 
-* WAL(Write Ahead Log)
-  + 데이터 저장 실패를 복구하기 위해서 사용
-* BlockCache 
-  + 읽기 캐시
-* MemStore
-  + 쓰기 캐시
-  + 각 리전의 컬럼 패밀리당 하나
-* HFile
+* 클라이언트와 통신을 하고 데이터 관련 연산을 관리
+* 내부 region의 읽기와 쓰기 요청을 관리
+* Region Server Components 
+  + WAL(Write Ahead Log)
+    - 데이터 저장 실패를 복구하기 위해서 사용
+  + BlockCache 
+    - 읽기 캐시
+  + MemStore
+    - 쓰기 캐시
+    - 각 리전의 컬럼 패밀리당 하나
+  + HFile
 
 ### HBASE vs RDBMS
 
@@ -393,10 +405,24 @@ scan "$TABLE_NAME", {ROWPREFIXFILTER => "$ROWKEY"}
 scan "$TABLE_NAME", {OPTION => VALUE, FILTER => "FILTERNAME('VALUE')"}
 ```
 
-#### Exit the HBase Shell.
+#### 11. Exit the HBase Shell.
 
 ```
 hbase(main):006:0> quit 
+```
+
+`sample.txt`
+```
+create 'test', 'cf'
+list 'test'
+put 'test', 'row1', 'cf:a', 'value1'
+put 'test', 'row2', 'cf:b', 'value2'
+put 'test', 'row3', 'cf:c', 'value3'
+put 'test', 'row4', 'cf:d', 'value4'
+scan 'test'
+get 'test', 'row1'
+disable 'test'
+enable 'test'
 ```
 
 ---
@@ -527,6 +553,12 @@ Delete delete = new Delete(row1);
 delete.addColumn(family1.getBytes(), qualifier1);
 table.delete(delete);
 ```
+
+---
+
+### HBase 테이블 설계 
+
+#### 1. Connect to HBase
 
 ---
 
