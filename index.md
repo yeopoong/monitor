@@ -820,6 +820,40 @@ Storm 을 이용한 실시간 데이터 분석
 * Task
   + Bolt 및 Spout 객체
 
+### Example of a running topology
+![](http://storm.apache.org/releases/2.0.0-SNAPSHOT/images/example-of-a-running-topology.png)
+
+```java
+Config conf = new Config();
+conf.setNumWorkers(2); // use two worker processes
+
+topologyBuilder.setSpout("blue-spout", new BlueSpout(), 2); // set parallelism hint to 2
+
+topologyBuilder.setBolt("green-bolt", new GreenBolt(), 2)
+               .setNumTasks(4)
+               .shuffleGrouping("blue-spout");
+
+topologyBuilder.setBolt("yellow-bolt", new YellowBolt(), 6)
+               .shuffleGrouping("green-bolt");
+
+StormSubmitter.submitTopology(
+        "mytopology",
+        conf,
+        topologyBuilder.createTopology()
+    );
+```
+
+### Stream groupings
+> 볼트의 작업간에 스트림을 분할하는 방법을 정의 
+
+Storm에는 8 개의 내장 된 스트림 그룹이 있으며 CustomStreamGrouping 인터페이스를 구현하여 사용자 정의 스트림 그룹을 구현할 수 있다.
+
+* Shuffle grouping : 튜플은 각 볼트가 같은 수의 튜플을 확보 할 수 있도록 볼트 작업에 무작위로 분산
+* Fields grouping : 스트림은 그룹화에 지정된 필드로 분할. 예를 들어 스트림이 "user-id"필드로 그룹화 된 경우 동일한 "사용자 ID"를 가진 튜플은 항상 동일한 작업으로 이동하지만 다른 "사용자 ID"가 있는 튜플은 다른 작업으로 갈 수 있다.
+* All grouping : 모든 볼트 작업에서 스트림이 복제
+* Global grouping : 전체 스트림이 볼트 작업 중 하나만 수행. 특히, ID가 가장 낮은 작업으로 이동
+* Direct grouping : 튜플의 제작자가 소비자의 어떤 작업이이 튜플을 수신 할 것인지를 결정 
+
 ## Storm Example
 
 ### 1. HelloTopology Example

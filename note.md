@@ -56,6 +56,10 @@ $ bin/kafka-console-producer.sh --broker-list localhost:9092 --topic TestTopic
 $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic TestTopic --from-beginning
 ```
 
+```
+@timestamp : 2015-11-10T15:32:06.046+09:00; doctype : sns; key : 974cfc83-99e0-420e-bfd1-2262e4e82dbd; appid : com.facebook.katana; appversion : 48
+```
+
 ## 기타
 
 ```
