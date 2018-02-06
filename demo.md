@@ -331,6 +331,8 @@ $ scp -r hbase-1.2.6 hadoop03:/home/vagrant
 $ bin/start-hbase.sh
 $ bin/stop-hbase.sh
 $ bin/hbase shell
+hbase(main):002:0> create 'Table1', {NAME => 'cf1', VERSIONS => 1}
+hbase(main):002:0> alter 'Table1', {NAME => 'cf2', VERSIONS => 1}
 hbase(main):002:0> count 'Table1'
 hbase(main):006:0> scan 'Table1', {LIMIT => 2}
 ```
