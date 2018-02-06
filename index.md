@@ -202,10 +202,6 @@ Reduce
 * 가용성과 확장성
   + Region 서버만 추가하여 확장성 및 가용성 확보가 용이
   + 단, 특정 Region 서버에 부하가 집중되면 성능저하가 발생 -> 로우키 설계가 중요
-* CAP: "분산 시스템에서는 다음의 3개 속성을 모두 가지는 것이 불가능하다"
-  + Consistency (V)
-  + **Availability**
-  + Partitions Tolerance (V)
 * Apache Phoenix: Add SQL Layer 
 
 ### Column Family
@@ -283,6 +279,25 @@ Reduce
     - 쓰기 캐시
     - 각 리전의 컬럼 패밀리당 하나
   + HFile
+
+### HBase Minor Compaction
+
+![](https://docs.google.com/drawings/d/1bDjntHOyISyw5Vk0dFKJ69AjjozY-I-B_YTyz1OJw-Q/pub?w=690&h=356)
+
+* 데이터를 입력하다 보면 여러 개의 작은 HFile들이 만들어진다. 
+* 파일들이 많아지면 성능이 떨어질 수 있는데, 
+* Minor compaction은 여러 개의 HFile들을 하나의 큰 HFile로 통합 
+* HFile에 저장된 데이터는 정렬되어 있으므로 merge sort를 이용해서 빠르게 합병
+
+### HBase Major Compaction
+
+![](https://docs.google.com/drawings/d/1m73104DlePnvL3dwBywTYiyHMHKDJTD__CfVXt3SdTU/pub?w=690&h=356)
+
+* Major compaction은 리전에 있는 모든 HFiles들을 모아서 컬럼당 하나의 HFile로 만든다.
+* 이 과정에서 필요없는 셀, 시간이 초과된 셀등을 제거해서 전반적인 읽기 성능을 높인다.
+* 대량의 파일들에 대한 읽기/쓰기 작업이 일어나기 때문에 디스크 I/O와 트래픽 증가가 발생
+* Major compaction은 자동으로 실행하도록 예약
+* 서비스에 미치는 영향을 최소화하기 위해서 주말이나 야간으로 스케줄링
 
 ### HBASE vs RDBMS
 
@@ -640,7 +655,7 @@ public class PhoenixExample {
 
 * 설정 정보 관리
 * 노드 리스트 관리
-* 리더선정
+* 리더선정(쓰기 명령을 총괄)
 
 ### ZooKeeper Architecture
 
@@ -917,22 +932,42 @@ Kafka 및 Redis 활용
 
 ### Topics and Logs 
 
+Kafka 클러스터는 다음과 같은 파티션 로그를 유지
+
 ![](http://kafka.apache.org/10/images/log_anatomy.png)
 
-### Producers
+* 보존 기간을 사용하여 레코드를 보유
+* 오프셋은 소비자가 제어
+* 병렬처리의 단위
 
-### Consumers
+### Guarantees
 
+* 생산자가 특정 주제 파티션으로 보낸 메시지는 전송 된 순서대로 추가
+* 소비자 인스턴스는 로그에 저장된 순서대로 레코드를 봄 
+* 복제 인수 N이있는 항목의 경우 로그에 커밋 된 레코드를 손실하지 않고 최대 N-1 개의 서버 오류를 허용
+
+### Kafka as a Storage System
+
+Kafka에 기록 된 데이터는 디스크에 기록되고 내결함성을 위해 복제 
 
 ## 4.2 Kafka-Storm Example
 
 `pom.xml`
 ```xml
 <dependency>
-  <groupId>org.apache.storm</groupId>
-  <artifactId>storm-core</artifactId>
-  <version>1.1.1</version>
-  <scope>provided</scope>
+	<groupId>org.apache.storm</groupId>
+	<artifactId>storm-kafka</artifactId>
+	<version>1.1.1</version>
+</dependency>
+<dependency>
+	<groupId>org.apache.kafka</groupId>
+	<artifactId>kafka-clients</artifactId>
+	<version>0.10.0.1</version>
+</dependency>
+<dependency>
+	<groupId>org.apache.kafka</groupId>
+	<artifactId>kafka_2.11</artifactId>
+	<version>0.10.0.1</version>
 </dependency>
 ```
 
