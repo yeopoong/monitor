@@ -556,12 +556,6 @@ table.delete(delete);
 
 ---
 
-### HBase 테이블 설계 
-
-#### 1. Connect to HBase
-
----
-
 ### Apache Phoenix
 > Phoenix is an open source SQL skin for HBase.  
 > You use the standard JDBC APIs instead of the regular HBase client APIs to create tables, insert data, and query your HBase data.
